@@ -88,7 +88,22 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
         onLoginSuccess(cachedSession);
         return;
       } catch (err: any) {
-        console.warn('Online login unavailable or failed, attempting cached offline login fallback:', err.message);
+        if (err.response) {
+          // Backend responded with an HTTP error status (401, 403, 422, 500, etc.)
+          const detail = err.response.data?.detail;
+          if (err.response.status === 401) {
+            setError(detail || 'Incorrect username or password.');
+          } else if (err.response.status === 403) {
+            setError(detail || 'User account is deactivated or forbidden.');
+          } else {
+            setError(detail || `Authentication server error (${err.response.status}). Please try again.`);
+          }
+          setLoading(false);
+          return;
+        }
+
+        // Genuine network/connectivity failure (no HTTP response received from server)
+        console.warn('Online login network unavailable, attempting cached offline login fallback:', err.message);
       }
     }
 
