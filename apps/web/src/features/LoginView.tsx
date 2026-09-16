@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Lock, User, KeyRound, AlertCircle } from 'lucide-react';
+import { Lock, User, KeyRound, AlertCircle, Eye, EyeOff, HelpCircle, X } from 'lucide-react';
 import axios from 'axios';
 import { db } from '../db/schema';
 import { getApiBaseUrl } from '../config';
@@ -38,6 +38,8 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
   const { t } = useTranslation();
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -155,7 +157,32 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             <label style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '6px', fontWeight: 600 }}>Password</label>
             <div style={{ position: 'relative' }}>
               <KeyRound size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-              <input type="password" className="form-control" required style={{ paddingLeft: '38px' }} placeholder="Enter password" value={password} onChange={e => setPassword(e.target.value)} />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="form-control"
+                required
+                style={{ paddingLeft: '38px', paddingRight: '38px' }}
+                placeholder="Enter password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(true)}
+                style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '0.75rem', cursor: 'pointer', padding: 0, fontWeight: 500 }}
+              >
+                Forgot Password?
+              </button>
             </div>
           </div>
 
@@ -163,6 +190,38 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             <Lock size={16} /> {loading ? 'Authenticating...' : 'Sign In to Portal'}
           </button>
         </form>
+
+        {showForgotModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '16px' }}>
+            <div className="glass-card" style={{ width: '100%', maxWidth: '420px', padding: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <HelpCircle size={20} style={{ color: '#38bdf8' }} />
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>Password Recovery</h3>
+                </div>
+                <button onClick={() => setShowForgotModal(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: '1.5', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <p>
+                  To reset your account password, please contact your <strong style={{ color: '#f8fafc' }}>Shiksha Academy System Administrator</strong>.
+                </p>
+                <div style={{ padding: '12px', background: '#0f172a', borderRadius: '8px', border: '1px solid #334155', color: '#38bdf8' }}>
+                  <strong>Administrator Policy:</strong><br />
+                  For security compliance, staff passwords must be updated directly by an authorized administrator through the User Management portal.
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+                <button onClick={() => setShowForgotModal(false)} className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
